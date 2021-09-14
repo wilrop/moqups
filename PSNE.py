@@ -72,7 +72,7 @@ def print_psne(psne_lst):
 
 
 if __name__ == '__main__':
-    u_tpl = (games.u1, games.u2)
+    u_tpl = (games.u1, games.u2)  # Utility functions. Note that these must be convex to ensure correctness.
     monfg = games.get_payoff_matrix('game1')
     player_actions = monfg.shape[:-1]  # Get the number of actions available to each player.
     psne_lst = find_all_psne(monfg, player_actions, u_tpl)
