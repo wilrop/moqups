@@ -2,6 +2,25 @@ import numpy as np
 import games
 
 
+def scalarise_matrix(payoff_matrix, u, player_actions):
+    """
+    This function will scalarise a matrix according to a given utility function.
+    :param payoff_matrix: The input payoffs.
+    :param u: A utility function.
+    :param player_actions: A tuple with the number of actions for each player.
+    :return: The scalarised game.
+    """
+    scalarised_matrix = np.zeros(player_actions)
+    num_strategies = np.prod(player_actions)
+
+    for i in range(num_strategies):
+        idx = np.unravel_index(i, player_actions)
+        utility = u(payoff_matrix[idx])
+        scalarised_matrix[idx] = utility
+
+    return scalarised_matrix
+
+
 def reduce_monfg(monfg, player_actions, u_tpl):
     """
     This function will reduce the MONFG to an NFG as a list of payoff matrices.
@@ -11,8 +30,8 @@ def reduce_monfg(monfg, player_actions, u_tpl):
     :return: An NFG.
     """
     nfg = []  # Collect the payoff matrices.
-    for u in u_tpl:
-        scalarised_payoff = games.scalarise_matrix(monfg, u, player_actions)  # Scalarise the MONFG.
+    for player, u in enumerate(u_tpl):
+        scalarised_payoff = scalarise_matrix(monfg[player], u, player_actions)  # Scalarise the MONFG.
         nfg.append(scalarised_payoff)
     return nfg
 
@@ -31,18 +50,22 @@ def calc_nfg_psne(nfg, player_actions):
     for player, payoffs in enumerate(nfg):
         best_response_matrix = np.zeros(player_actions, dtype=bool)  # Initialise a new boolean best response matrix.
         maxima = np.amax(nfg[player], axis=player)  # The payoffs of the best responses to all other players strategies.
-
         for i in range(num_strategies):  # Loop over all joint strategies.
             idx = np.unravel_index(i, player_actions)  # Get the correctly shaped index of this strategy.
-            max_idx = list(idx)
-            del max_idx[player]  # Find the opponent strategy that corresponds with this joint strategy.
-            max = maxima[max_idx]  # Get the payoff of the best response to this opponent strategy.
+            opp_strat = list(idx)  # Turn the index into a list for the next operation.
+            del opp_strat[player]  # Find the opponent strategy that corresponds with this joint strategy.
+            opp_strat = tuple(opp_strat)  # Turn it back into a tuple.
+            max = maxima[opp_strat]  # Get the payoff of the best response to this opponent strategy.
             if payoffs[idx] >= max:  # If the payoff of this joint strategy is equal or greater.
                 best_response_matrix[idx] = True  # It is a best response to the opponent strategies.
 
         best_responses.append(best_response_matrix)
 
-    nash_equilibria = np.logical_and(best_responses[0], best_responses[1])  # Best response to a best response is NE.
+    nash_equilibria = np.ones(player_actions, dtype=bool)  # Initialise a new matrix holding the PSNE.
+    for i in range(len(best_responses)):
+        nash_equilibria = np.logical_and(nash_equilibria,
+                                         best_responses[i])  # Best response to all best responses is a NE.
+
     psne = np.argwhere(nash_equilibria)  # Get the action profiles that result in these PSNE.
     return psne
 
@@ -72,8 +95,8 @@ def print_psne(psne_lst):
 
 
 if __name__ == '__main__':
-    u_tpl = (games.u1, games.u2)  # Utility functions. Note that these must be convex to ensure correctness.
-    monfg = games.get_payoff_matrix('game1')
-    player_actions = monfg.shape[:-1]  # Get the number of actions available to each player.
+    u_tpl = (games.u1, games.u2, games.u3)  # Utility functions. Note that these must be convex to ensure correctness.
+    monfg = games.get_monfg('game9')
+    player_actions = monfg[0].shape[:-1]  # Get the number of actions available to each player.
     psne_lst = find_all_psne(monfg, player_actions, u_tpl)
     print_psne(psne_lst)
