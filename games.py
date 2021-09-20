@@ -190,3 +190,25 @@ def get_monfg(game):
         raise Exception("The provided game does not exist.")
 
     return monfg
+
+
+def generate_random_monfg(player_actions=(2, 2), num_objectives=2, reward_min_bound=0, reward_max_bound=5):
+    """
+    This function will generate a random MONFG for testing purposes.
+    :param player_actions: A tuple of actions indexed by player.
+    :param num_objectives: The number of objectives in the game.
+    :param reward_min_bound: The minimum reward on an objective.
+    :param reward_max_bound: The maximum reward on an objective.
+    :return: A list of payoff matrices representing the MONFG.
+    """
+    payoffs = []
+    num_strategies = np.prod(player_actions)
+
+    for _ in range(len(player_actions)):  # Make a payoff matrix for every player.
+        payoff_matrix = np.zeros(shape=player_actions, dtype=tuple)
+        for i in range(num_strategies):  # Loop over all strategies.
+            random_reward = tuple(np.random.randint(low=reward_min_bound, high=reward_max_bound, size=num_objectives))
+            payoff_matrix.flat[i] = random_reward
+        payoffs.append(payoff_matrix)
+
+    return payoffs
