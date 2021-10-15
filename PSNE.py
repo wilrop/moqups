@@ -38,7 +38,6 @@ def reduce_monfg(monfg, player_actions, u_tpl):
     return nfg
 
 
-# Works only for two player games now
 def calc_nfg_psne(nfg, player_actions):
     """
     This function will calculate the PSNE from the scalarised game.
@@ -119,7 +118,7 @@ if __name__ == '__main__':
         monfg = games.generate_random_monfg(player_actions, args.num_objectives, args.lower_bound, args.upper_bound)
         print(monfg)
     else:
-        u_tpl = (games.u1, games.u2)  # Utility functions. Note that these must be convex to ensure correctness.
+        u_tpl = (games.u1, games.u2)  # Utility functions. Note that these must be quasiconvex to ensure correctness.
         monfg = games.get_monfg(args.game)
         player_actions = monfg[0].shape[:-1]  # Get the number of actions available to each player.
 
