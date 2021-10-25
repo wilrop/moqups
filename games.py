@@ -36,6 +36,7 @@ monfg3 = [
 # Game 4: A 2-action 2-player game with team rewards.
 # This game has two PSNE using u1 and u2: [0, 0], [1, 1]
 # Checked for correctness using Gambit.
+# This game shows cyclic behaviour under IBR.
 monfg4 = [
     np.array([[(4, 1), (1, 2)],
               [(3, 1), (3, 2)]]),
@@ -192,6 +193,26 @@ def get_monfg(game):
     return monfg
 
 
+def get_u(u_str):
+    """
+    This function gets the correct utility function from its name.
+    :param u_str: The requested utility function.
+    :return: A utility function.
+    """
+    if u_str == 'u1':
+        u = u1
+    elif u_str == 'u2':
+        u = u2
+    elif u_str == 'u3':
+        u = u3
+    elif u_str == 'u4':
+        u = u4
+    else:
+        raise Exception("The provided game does not exist.")
+
+    return u
+
+
 def generate_random_monfg(player_actions=(2, 2), num_objectives=2, reward_min_bound=0, reward_max_bound=5):
     """
     This function will generate a random MONFG for testing purposes.
@@ -209,6 +230,7 @@ def generate_random_monfg(player_actions=(2, 2), num_objectives=2, reward_min_bo
         for i in range(num_strategies):  # Loop over all strategies.
             random_reward = tuple(np.random.randint(low=reward_min_bound, high=reward_max_bound, size=num_objectives))
             payoff_matrix.flat[i] = random_reward
+        payoff_matrix = np.array(payoff_matrix.tolist())  # Hack to make it a "clean" numpy array.
         payoffs.append(payoff_matrix)
 
     return payoffs
