@@ -2,6 +2,7 @@ import time
 import argparse
 import numpy as np
 import games
+import util
 
 
 def scalarise_matrix(payoff_matrix, u, player_actions):
@@ -84,17 +85,6 @@ def find_all_psne(monfg, player_actions, u_tpl):
     return psne_lst
 
 
-def print_psne(psne_lst):
-    """
-    This function will pretty print the list of PSNE.
-    :param psne_lst: A list of PSNE.
-    :return: /
-    """
-    print('There are a total of ' + repr(len(psne_lst)) + ' pure strategy Nash equilibria')
-    for psne in psne_lst:
-        print(repr(psne))
-
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
@@ -102,7 +92,10 @@ if __name__ == '__main__':
                         choices=['game1', 'game2', 'game3', 'game4', 'game5', 'game6', 'game7', 'game8', 'game9',
                                  'random'],
                         help="which MONFG to play")
-    parser.add_argument('--player_actions', type=int, nargs='+', default=[5, 5, 5], help='The number of actions per agent')
+    parser.add_argument('-u', type=str, default=['u1', 'u2'], choices=['u1', 'u2', 'u3', 'u4'], nargs='+',
+                        help="Which utility functions to use per player.")
+    parser.add_argument('--player_actions', type=int, nargs='+', default=[3, 3],
+                        help='The number of actions per agent')
     parser.add_argument('--num_objectives', type=int, default=2, help="The number of objectives for the random MONFG")
     parser.add_argument('--lower_bound', type=int, default=0, help='The lower reward bound.')
     parser.add_argument('--upper_bound', type=int, default=5, help='The upper reward bound.')
@@ -113,17 +106,15 @@ if __name__ == '__main__':
 
     if args.game == 'random':
         player_actions = tuple(args.player_actions)
-        possible_u = (games.u1, games.u2, games.u3, games.u4)
-        u_tpl = tuple(np.random.choice(possible_u, len(player_actions), replace=True))
         monfg = games.generate_random_monfg(player_actions, args.num_objectives, args.lower_bound, args.upper_bound)
-        print(monfg)
     else:
-        u_tpl = (games.u1, games.u2)  # Utility functions. Note that these must be quasiconvex to ensure correctness.
         monfg = games.get_monfg(args.game)
-        player_actions = monfg[0].shape[:-1]  # Get the number of actions available to each player.
+
+    player_actions = monfg[0].shape[:-1]  # Get the number of actions available to each player.
+    u_tpl = tuple([games.get_u(u_str) for u_str in args.u])  # These must be quasiconvex to ensure correctness.
 
     psne_lst = find_all_psne(monfg, player_actions, u_tpl)
-    print_psne(psne_lst)
+    util.print_psne(psne_lst)
 
     end = time.time()
     elapsed_secs = (end - start)
