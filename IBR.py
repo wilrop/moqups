@@ -99,10 +99,7 @@ if __name__ == '__main__':
 
     # guess = [np.array([0, 1]), np.array([0, 1])]
     ne, final_strategy = iterated_best_response(u_tpl, player_actions, monfg, max_iter=iterations, variant=variant)
-    if ne:
-        util.print_ne(final_strategy)
-    else:
-        print(f'No Nash equilibrium was found.')
+    util.print_ne(ne, final_strategy)
 
     end = time.time()
     elapsed_secs = (end - start)
