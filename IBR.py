@@ -22,6 +22,8 @@ def iterated_best_response(u_tpl, player_actions, monfg, max_iter=1000, init_joi
     :param variant: The variant to use. This is either simultaneous or alternating.
     :return: Whether or not we reached a Nash equilibrium and the final joint strategy.
     """
+    util.print_start('Iterated Best Response')
+
     players = []  # A list to hold all the agents.
     joint_strategy = []  # A list to hold the current joint strategy.
 
