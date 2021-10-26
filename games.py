@@ -37,6 +37,7 @@ monfg3 = [
 # This game has two PSNE using u1 and u2: [0, 0], [1, 1]
 # Checked for correctness using Gambit.
 # This game shows cyclic behaviour under IBR with simultaneous updates but not with alternating updates.
+# This game shows no cyclic behaviour with fictitious play.
 monfg4 = [
     np.array([[(4, 1), (1, 2)],
               [(3, 1), (3, 2)]]),
