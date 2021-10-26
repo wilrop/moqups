@@ -1,22 +1,25 @@
 import argparse
 import time
+import copy
 import games
 import util
 import numpy as np
 
 from Agent import IBRAgent
-from best_response import best_response
 
 
-def iterated_best_response(u_tpl, player_actions, monfg, max_iter=5000, init_joint_strategy=None):
+def iterated_best_response(u_tpl, player_actions, monfg, max_iter=1000, init_joint_strategy=None, variant='simultaneous'):
     """
     This function executes the iterated best response algorithm on a given MONFG with accompanied utility functions.
+    Note that the simultaneous and alternating variants are not equivalent in general. In the simultaneous variant, all
+    players calculate their best-response strategy simultaneously. The alternating variant does it by alternating.
     Note that at this point in time, this algorithm does not find cycles in the IBR dynamic.
     :param u_tpl: A tuple of utility functions.
     :param player_actions: A tuple of actions per player.
     :param monfg: A list of payoff matrices representing the MONFG.
     :param max_iter: The maximum amount of iterations to run IBR for.
     :param init_joint_strategy: Initial guess for the joint strategy.
+    :param variant: The variant to use. This is either simultaneous or alternating.
     :return: Whether or not we reached a Nash equilibrium and the final joint strategy.
     """
     players = []  # A list to hold all the agents.
@@ -33,15 +36,21 @@ def iterated_best_response(u_tpl, player_actions, monfg, max_iter=5000, init_joi
         joint_strategy.append(player.strategy)
 
     nash_equilibrium = False  # The current joint strategy is not known to be a Nash equilibrium at this point.
+    new_joint_strategy = copy.deepcopy(joint_strategy)
+    if variant == 'simultaneous':
+        # We hide the strategy updates of other agents until everyone is finished. This makes it a simultaneous update.
+        def update_strategy(): return joint_strategy
+    else:
+        # We show the strategy updates of other agents. This makes it an alternating update.
+        def update_strategy(): return new_joint_strategy
 
-    for iter in range(max_iter):
-        print(f'Performing iteration {iter}')
+    for i in range(max_iter):
+        print(f'Performing iteration {i}')
         converged = True
-        new_joint_strategy = []
 
-        for player in players:  # Each iteration update all agents.
-            done, br = player.update_policy(joint_strategy)
-            new_joint_strategy.append(br)
+        for id, player in enumerate(players):
+            done, br = player.update_policy(update_strategy())  # Use the update strategy.
+            new_joint_strategy[id] = br  # Update the joint strategy.
             if not done:
                 converged = False
 
@@ -49,7 +58,7 @@ def iterated_best_response(u_tpl, player_actions, monfg, max_iter=5000, init_joi
             nash_equilibrium = True
             break
         else:
-            joint_strategy = new_joint_strategy  # Update the joint strategy.
+            joint_strategy = copy.deepcopy(new_joint_strategy)  # Update the joint strategy.
 
     return nash_equilibrium, joint_strategy
 
@@ -57,15 +66,17 @@ def iterated_best_response(u_tpl, player_actions, monfg, max_iter=5000, init_joi
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--game', type=str, default='game4',
+    parser.add_argument('--game', type=str, default='game1',
                         choices=['game1', 'game2', 'game3', 'game4', 'game5', 'game6', 'game7', 'game8', 'game9',
                                  'random'],
                         help="which MONFG to play")
+    parser.add_argument('--variant', type=str, default='alternating', choices=['simultaneous', 'alternating'])
+    parser.add_argument('--iterations', type=int, default=1000, help="The maximum number of iterations.")
     parser.add_argument('-u', type=str, default=['u1', 'u2'], choices=['u1', 'u2', 'u3', 'u4'], nargs='+',
                         help="Which utility functions to use per player.")
     parser.add_argument('--player_actions', type=int, nargs='+', default=[5, 5],
                         help='The number of actions per agent')
-    parser.add_argument('--num_objectives', type=int, default=2, help="The number of objectives for the random MONFG")
+    parser.add_argument('--num_objectives', type=int, default=2, help="The number of objectives for the random MONFG.")
     parser.add_argument('--lower_bound', type=int, default=0, help='The lower reward bound.')
     parser.add_argument('--upper_bound', type=int, default=5, help='The upper reward bound.')
 
@@ -81,9 +92,11 @@ if __name__ == '__main__':
 
     player_actions = monfg[0].shape[:-1]  # Get the number of actions available to each player.
     u_tpl = tuple([games.get_u(u_str) for u_str in args.u])
+    variant = args.variant
+    iterations = args.iterations
 
     # guess = [np.array([0, 1]), np.array([0, 1])]
-    ne, final_strategy = iterated_best_response(u_tpl, player_actions, monfg)
+    ne, final_strategy = iterated_best_response(u_tpl, player_actions, monfg, max_iter=iterations, variant=variant)
     if ne:
         util.print_ne(final_strategy)
     else:
