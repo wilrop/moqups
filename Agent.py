@@ -46,7 +46,7 @@ class FPAgent:
     def update_policy(self):
         joint_strategy = self.calc_joint_strategy()
         br = best_response(self.u, self.id, self.payoff_matrix, joint_strategy)
-        if br.all() == self.strategy.all():
+        if (br == self.strategy).all():
             done = True
         else:
             done = False
