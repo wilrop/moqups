@@ -36,7 +36,7 @@ monfg3 = [
 # Game 4: A 2-action 2-player game with team rewards.
 # This game has two PSNE using u1 and u2: [0, 0], [1, 1]
 # Checked for correctness using Gambit.
-# This game shows cyclic behaviour under IBR.
+# This game shows cyclic behaviour under IBR with simultaneous updates but not with alternating updates.
 monfg4 = [
     np.array([[(4, 1), (1, 2)],
               [(3, 1), (3, 2)]]),
@@ -47,6 +47,7 @@ monfg4 = [
 # Game 5: A 3-action 2-player game with team rewards.
 # This game has three PSNE using u1 and u2: [0, 0], [1, 1], [2, 2]
 # Checked for correctness using Gambit.
+# This game shows cyclic behaviour under IBR with simultaneous updates but not with alternating updates.
 monfg5 = [
     np.array([[(4, 1), (1, 2), (2, 1)],
               [(3, 1), (3, 2), (1, 2)],
