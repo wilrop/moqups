@@ -3,10 +3,12 @@ import time
 import games
 import util
 import numpy as np
+
+from Agent import IBRAgent
 from best_response import best_response
 
 
-def iterated_best_response(u_tpl, player_actions, monfg, max_iter=5000, joint_strategy=None):
+def iterated_best_response(u_tpl, player_actions, monfg, max_iter=5000, init_joint_strategy=None):
     """
     This function executes the iterated best response algorithm on a given MONFG with accompanied utility functions.
     Note that at this point in time, this algorithm does not find cycles in the IBR dynamic.
@@ -14,31 +16,40 @@ def iterated_best_response(u_tpl, player_actions, monfg, max_iter=5000, joint_st
     :param player_actions: A tuple of actions per player.
     :param monfg: A list of payoff matrices representing the MONFG.
     :param max_iter: The maximum amount of iterations to run IBR for.
-    :param joint_strategy: Initial guess for the joint strategy.
+    :param init_joint_strategy: Initial guess for the joint strategy.
     :return: Whether or not we reached a Nash equilibrium and the final joint strategy.
     """
-    num_players = len(player_actions)
-    if joint_strategy is None:
-        joint_strategy = [np.full(num_actions, 1/num_actions) for num_actions in player_actions]
+    players = []  # A list to hold all the agents.
+    joint_strategy = []  # A list to hold the current joint strategy.
+
+    for player, num_actions in enumerate(player_actions):  # Loop over all players to create a new IBRAgent object.
+        u = u_tpl[player]
+        payoff_matrix = monfg[player]
+        init_strategy = None
+        if init_joint_strategy is not None:
+            init_strategy = init_joint_strategy[player]
+        player = IBRAgent(player, u, num_actions, payoff_matrix, init_strategy)
+        players.append(player)
+        joint_strategy.append(player.strategy)
+
     nash_equilibrium = False  # The current joint strategy is not known to be a Nash equilibrium at this point.
 
     for iter in range(max_iter):
         print(f'Performing iteration {iter}')
-        new_joint_strategy = []
         converged = True
-        for player in range(num_players):
-            u = u_tpl[player]
-            payoff_matrix = monfg[player]
-            br = best_response(u, player, payoff_matrix, joint_strategy)
+        new_joint_strategy = []
+
+        for player in players:  # Each iteration update all agents.
+            done, br = player.update_policy(joint_strategy)
             new_joint_strategy.append(br)
-            if br.all() != joint_strategy[player].all():
+            if not done:
                 converged = False
 
         if converged:  # If everything already is a best-response to the joint strategy, we reached a NE.
             nash_equilibrium = True
             break
         else:
-            joint_strategy = new_joint_strategy
+            joint_strategy = new_joint_strategy  # Update the joint strategy.
 
     return nash_equilibrium, joint_strategy
 
@@ -69,12 +80,12 @@ if __name__ == '__main__':
         monfg = games.get_monfg(args.game)
 
     player_actions = monfg[0].shape[:-1]  # Get the number of actions available to each player.
-    u_tpl = tuple([games.get_u(u_str) for u_str in args.u])  # These must be quasiconvex to ensure correctness.
+    u_tpl = tuple([games.get_u(u_str) for u_str in args.u])
 
     # guess = [np.array([0, 1]), np.array([0, 1])]
-    ne, joint_strategy = iterated_best_response(u_tpl, player_actions, monfg)
+    ne, final_strategy = iterated_best_response(u_tpl, player_actions, monfg)
     if ne:
-        util.print_ne(joint_strategy)
+        util.print_ne(final_strategy)
     else:
         print(f'No Nash equilibrium was found.')
 
