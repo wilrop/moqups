@@ -5,7 +5,7 @@ import games
 import util
 import numpy as np
 
-from Agent import IBRAgent
+from Player import IBRPlayer
 
 
 def iterated_best_response(u_tpl, player_actions, monfg, max_iter=1000, init_joint_strategy=None, variant='simultaneous'):
@@ -24,7 +24,7 @@ def iterated_best_response(u_tpl, player_actions, monfg, max_iter=1000, init_joi
     """
     util.print_start('Iterated Best Response')
 
-    players = []  # A list to hold all the agents.
+    players = []  # A list to hold all the players.
     joint_strategy = []  # A list to hold the current joint strategy.
 
     for player, num_actions in enumerate(player_actions):  # Loop over all players to create a new IBRAgent object.
@@ -33,17 +33,17 @@ def iterated_best_response(u_tpl, player_actions, monfg, max_iter=1000, init_joi
         init_strategy = None
         if init_joint_strategy is not None:
             init_strategy = init_joint_strategy[player]
-        player = IBRAgent(player, u, num_actions, payoff_matrix, init_strategy)
+        player = IBRPlayer(player, u, num_actions, payoff_matrix, init_strategy)
         players.append(player)
         joint_strategy.append(player.strategy)
 
     nash_equilibrium = False  # The current joint strategy is not known to be a Nash equilibrium at this point.
     new_joint_strategy = copy.deepcopy(joint_strategy)
     if variant == 'simultaneous':
-        # We hide the strategy updates of other agents until everyone is finished. This makes it a simultaneous update.
+        # We hide the strategy updates of other players until everyone is finished. This makes it a simultaneous update.
         def update_strategy(): return joint_strategy
     else:
-        # We show the strategy updates of other agents. This makes it an alternating update.
+        # We show the strategy updates of other players. This makes it an alternating update.
         def update_strategy(): return new_joint_strategy
 
     for i in range(max_iter):
@@ -51,7 +51,7 @@ def iterated_best_response(u_tpl, player_actions, monfg, max_iter=1000, init_joi
         converged = True
 
         for id, player in enumerate(players):
-            done, br = player.update_policy(update_strategy())  # Use the update strategy.
+            done, br = player.update_strategy(update_strategy())  # Use the update strategy.
             new_joint_strategy[id] = br  # Update the joint strategy.
             if not done:
                 converged = False
@@ -77,7 +77,7 @@ if __name__ == '__main__':
     parser.add_argument('-u', type=str, default=['u1', 'u2'], choices=['u1', 'u2', 'u3', 'u4'], nargs='+',
                         help="Which utility functions to use per player.")
     parser.add_argument('--player_actions', type=int, nargs='+', default=[5, 5],
-                        help='The number of actions per agent')
+                        help='The number of actions per player')
     parser.add_argument('--num_objectives', type=int, default=2, help="The number of objectives for the random MONFG.")
     parser.add_argument('--lower_bound', type=int, default=0, help='The lower reward bound.')
     parser.add_argument('--upper_bound', type=int, default=5, help='The upper reward bound.')

@@ -4,7 +4,7 @@ import games
 import util
 import numpy as np
 
-from Agent import FPAgent
+from Player import FPPlayer
 
 
 def fictitious_play(u_tpl, player_actions, monfg, max_iter=1000, init_joint_strategy=None, variant='simultaneous'):
@@ -36,7 +36,7 @@ def fictitious_play(u_tpl, player_actions, monfg, max_iter=1000, init_joint_stra
             player.update_joint_states(actions)
 
         for id, player in enumerate(players):  # Update the policies simultaneously.
-            done, br = player.update_policy()
+            done, br = player.update_strategy()
             joint_strategy[id] = br  # Update the joint strategy.
             if not done:
                 converged = False
@@ -50,7 +50,7 @@ def fictitious_play(u_tpl, player_actions, monfg, max_iter=1000, init_joint_stra
         """
         converged = True
 
-        for id, player in enumerate(players):  # Loop once over each agent to update with alternating.
+        for id, player in enumerate(players):  # Loop once over each player to update with alternating.
             actions = []
 
             for player in players:  # Collect actions.
@@ -59,7 +59,7 @@ def fictitious_play(u_tpl, player_actions, monfg, max_iter=1000, init_joint_stra
             for player in players:  # Update the empirical state distributions.
                 player.update_joint_states(actions)
 
-            done, br = player.update_policy()  # Update the current agent's policy.
+            done, br = player.update_strategy()  # Update the current player's policy.
             joint_strategy[id] = br  # Update the joint strategy.
             if not done:
                 converged = False
@@ -68,7 +68,7 @@ def fictitious_play(u_tpl, player_actions, monfg, max_iter=1000, init_joint_stra
 
     util.print_start('Fictitious Play')
 
-    players = []  # A list to hold all the agents.
+    players = []  # A list to hold all the players.
     joint_strategy = []  # A list to hold the current joint strategy.
 
     for player, u in enumerate(u_tpl):  # Loop over all players to create a new FPAgent object.
@@ -76,7 +76,7 @@ def fictitious_play(u_tpl, player_actions, monfg, max_iter=1000, init_joint_stra
         init_strategy = None
         if init_joint_strategy is not None:
             init_strategy = init_joint_strategy[player]
-        player = FPAgent(player, u, player_actions, payoff_matrix, init_strategy)
+        player = FPPlayer(player, u, player_actions, payoff_matrix, init_strategy)
         players.append(player)
         joint_strategy.append(player.strategy)
 
@@ -110,7 +110,7 @@ if __name__ == '__main__':
     parser.add_argument('-u', type=str, default=['u1', 'u2'], choices=['u1', 'u2', 'u3', 'u4'], nargs='+',
                         help="Which utility functions to use per player.")
     parser.add_argument('--player_actions', type=int, nargs='+', default=[5, 5],
-                        help='The number of actions per agent')
+                        help='The number of actions per player')
     parser.add_argument('--num_objectives', type=int, default=2, help="The number of objectives for the random MONFG.")
     parser.add_argument('--lower_bound', type=int, default=0, help='The lower reward bound.')
     parser.add_argument('--upper_bound', type=int, default=5, help='The upper reward bound.')
