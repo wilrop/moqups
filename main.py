@@ -1,8 +1,10 @@
 import argparse
 import time
+import numpy as np
 
 import util
 import games
+
 from PSNE import find_all_psne
 from IBR import iterated_best_response
 from fictitious_play import fictitious_play
@@ -15,6 +17,9 @@ def execute_algorithm(args):
     :return: /
     """
     start = time.time()  # Start measuring the time.
+
+    if args.seed is not None:
+        np.random.seed(args.seed)  # Set the numpy seed.
 
     if args.game == 'random':  # We get the game
         player_actions = tuple(args.player_actions)
@@ -54,17 +59,19 @@ if __name__ == '__main__':
         parser.add_argument('--game', type=str, default='game1',
                             choices=['game1', 'game2', 'game3', 'game4', 'game5', 'game6', 'game7', 'game8', 'game9',
                                      'random'],
-                            help="which MONFG to play")
-        parser.add_argument('-u', type=str, default=['u1', 'u2'], choices=['u1', 'u2', 'u3', 'u4'], nargs='+',
-                            help="Which utility functions to use per player.")
+                            help='The MONFG to play')
+        parser.add_argument('--u', type=str, default=['u1', 'u2'], choices=['u1', 'u2', 'u3', 'u4'], nargs='+',
+                            help="Which utility functions to use per player")
+        parser.add_argument('--seed', type=int, help='The seed used in all randomisation')
         parser.add_argument('--player_actions', type=int, nargs='+', default=[5, 5],
                             help='The number of actions per player')
-        parser.add_argument('--variant', type=str, default='simultaneous', choices=['simultaneous', 'alternating'])
-        parser.add_argument('--iterations', type=int, default=1000, help="The maximum number of iterations.")
+        parser.add_argument('--variant', type=str, default='simultaneous', choices=['simultaneous', 'alternating'],
+                            help='The variant of the algorithm if applicable')
+        parser.add_argument('--iterations', type=int, default=1000, help='The maximum number of iterations')
         parser.add_argument('--num_objectives', type=int, default=2,
-                            help="The number of objectives for the random MONFG.")
-        parser.add_argument('--lower_bound', type=int, default=0, help='The lower reward bound.')
-        parser.add_argument('--upper_bound', type=int, default=5, help='The upper reward bound.')
+                            help='The number of objectives for the random MONFG')
+        parser.add_argument('--lower_bound', type=int, default=0, help='The lower reward bound')
+        parser.add_argument('--upper_bound', type=int, default=5, help='The upper reward bound')
 
         args = parser.parse_args()
         execute_algorithm(args)
