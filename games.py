@@ -225,14 +225,10 @@ def generate_random_monfg(player_actions=(2, 2), num_objectives=2, reward_min_bo
     :return: A list of payoff matrices representing the MONFG.
     """
     payoffs = []
-    num_strategies = np.prod(player_actions)
+    payoffs_shape = player_actions + tuple([num_objectives])  # Define the shape of the payoff matrices.
 
-    for _ in range(len(player_actions)):  # Make a payoff matrix for every player.
-        payoff_matrix = np.zeros(shape=player_actions, dtype=tuple)
-        for i in range(num_strategies):  # Loop over all strategies.
-            random_reward = tuple(np.random.randint(low=reward_min_bound, high=reward_max_bound, size=num_objectives))
-            payoff_matrix.flat[i] = random_reward
-        payoff_matrix = np.array(payoff_matrix.tolist())  # Hack to make it a "clean" numpy array.
+    for _ in range(len(player_actions)):
+        payoff_matrix = np.random.randint(low=reward_min_bound, high=reward_max_bound, size=payoffs_shape)
         payoffs.append(payoff_matrix)
 
     return payoffs
