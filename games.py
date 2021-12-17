@@ -210,7 +210,7 @@ def get_u(u_str):
     elif u_str == 'u4':
         u = u4
     else:
-        raise Exception("The provided game does not exist.")
+        raise Exception("The provided utility function does not exist.")
 
     return u
 
@@ -230,5 +230,35 @@ def generate_random_monfg(player_actions=(2, 2), num_objectives=2, reward_min_bo
     for _ in range(len(player_actions)):
         payoff_matrix = np.random.randint(low=reward_min_bound, high=reward_max_bound, size=payoffs_shape)
         payoffs.append(payoff_matrix)
+
+    return payoffs
+
+
+def generate_identity_game(player_actions=(2, 2)):
+    """
+    This function generates an identity game.
+    :param player_actions: A tuple with at each index the number of actions for that player.
+    :return: A list of payoff matrices.
+    """
+    payoffs = []
+    joint_strat_length = np.sum(player_actions)  # Description length of a joint strategy.
+    num_joint_strat = np.prod(player_actions)  # Number of joint strategies.
+    payoffs_shape = player_actions + tuple([joint_strat_length])  # Shape of the payoff matrices.
+    payoff_matrix = np.zeros(payoffs_shape)  # Make the same payoff matrix for every player.
+
+    for flat_joint_strat in range(num_joint_strat):  # Loop over joint strategies.
+        joint_strat = np.unravel_index(flat_joint_strat, player_actions)  # Get the coordinates.
+        identity_vec = []  # Initialise the identity payoff. One hot encode joint strategies in this variable.
+        for player, action in enumerate(joint_strat):  # One hot encode each player's strategy.
+            strat_vec = np.zeros(player_actions[player])
+            strat_vec[action] = 1
+            identity_vec.extend(list(strat_vec))
+        payoff_matrix[joint_strat] = np.array(identity_vec)
+
+    payoffs.append(payoff_matrix)
+
+    for _ in range(len(player_actions)-1):  # We already have the first payoff matrix, so copy the rest now.
+        payoff_copy = np.copy(payoff_matrix)
+        payoffs.append(payoff_copy)
 
     return payoffs
