@@ -125,6 +125,14 @@ monfg9 = [
 ]
 
 
+monfg10 = [
+    np.array([[(2, 2), (0, 0)],
+              [(2, 2), (1, 1)]]),
+    np.array([[(2, 2), (2, 2)],
+              [(2, 2), (2, 2)]])
+]
+
+
 def u1(vector):
     """
     This function calculates the utility for agent 1.
@@ -189,6 +197,8 @@ def get_monfg(game):
         monfg = monfg8
     elif game == 'game9':
         monfg = monfg9
+    elif game == 'game10':
+        monfg = monfg10
     else:
         raise Exception("The provided game does not exist.")
 

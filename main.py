@@ -56,16 +56,12 @@ if __name__ == '__main__':
         parser = argparse.ArgumentParser()
 
         parser.add_argument('--algorithm', type=str, default='PSNE', choices=['PSNE', 'FP', 'IBR'])
-        parser.add_argument('--game', type=str, default='game1',
-                            choices=['game1', 'game2', 'game3', 'game4', 'game5', 'game6', 'game7', 'game8', 'game9',
-                                     'random'],
-                            help='The MONFG to play')
-        parser.add_argument('--u', type=str, default=['u1', 'u2'], choices=['u1', 'u2', 'u3', 'u4'], nargs='+',
-                            help="Which utility functions to use per player")
+        parser.add_argument('--game', type=str, default='game1', help='The MONFG to play')
+        parser.add_argument('--u', type=str, default=['u1', 'u1'], nargs='+', help="The utility functions to use.")
         parser.add_argument('--seed', type=int, help='The seed used in all randomisation')
         parser.add_argument('--player_actions', type=int, nargs='+', default=[5, 5],
                             help='The number of actions per player')
-        parser.add_argument('--variant', type=str, default='simultaneous', choices=['simultaneous', 'alternating'],
+        parser.add_argument('--variant', type=str, default='alternating', choices=['simultaneous', 'alternating'],
                             help='The variant of the algorithm if applicable')
         parser.add_argument('--iterations', type=int, default=1000, help='The maximum number of iterations')
         parser.add_argument('--num_objectives', type=int, default=2,
