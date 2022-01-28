@@ -40,4 +40,13 @@ In the example MONFG, it successfully finds the PSNE (A, A). This leads to a uti
 
 ## Cite
 Please use the following citation if you use these algorithms in your work.
-CITATION
+```
+@misc{ropke2021nash,
+      title={On Nash Equilibria in Normal-Form Games With Vectorial Payoffs}, 
+      author={Willem Röpke and Diederik M. Roijers and Ann Nowé and Roxana Rădulescu},
+      year={2021},
+      eprint={2112.06500},
+      archivePrefix={arXiv},
+      primaryClass={cs.GT}
+}
+```
