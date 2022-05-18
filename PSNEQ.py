@@ -88,7 +88,7 @@ def find_all_psne(monfg, player_actions, u_tpl):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--game', type=str, default='game1',
+    parser.add_argument('--game', type=str, default='game6',
                         choices=['game1', 'game2', 'game3', 'game4', 'game5', 'game6', 'game7', 'game8', 'game9',
                                  'random'],
                         help="which MONFG to play")
