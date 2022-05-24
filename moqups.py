@@ -72,9 +72,10 @@ def calc_nfg_psne(nfg, player_actions):
     return psne
 
 
-def find_all_psne(monfg, player_actions, u_tpl):
+def moqups(monfg, player_actions, u_tpl):
     """
-    This function will find all Pure Strategy Nash Equilibria (PSNE).
+    MOQUPS, Multi-Objective and Quasiconvex Utilities for Pure Strategies, finds all pure-strategy Nash equilibria
+    (PSNE) in multi-objective games with quasiconvex utility functions.
     :param monfg: An input MONFG.
     :param player_actions: A tuple of the amount of actions per player.
     :param u_tpl: A tuple of utility functions.
@@ -113,7 +114,7 @@ if __name__ == '__main__':
     player_actions = monfg[0].shape[:-1]  # Get the number of actions available to each player.
     u_tpl = tuple([games.get_u(u_str) for u_str in args.u])  # These must be quasiconvex to ensure correctness.
 
-    psne_lst = find_all_psne(monfg, player_actions, u_tpl)
+    psne_lst = moqups(monfg, player_actions, u_tpl)
     util.print_psne(psne_lst)
 
     end = time.time()
